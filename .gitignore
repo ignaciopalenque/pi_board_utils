@@ -2,3 +2,4 @@
 /app/static/json
 instance
 .db
+.venv
