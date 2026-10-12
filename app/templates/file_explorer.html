@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="file-explorer-container">
+    <!-- Selector de carpeta raíz -->
+    <div class="root-selector">
+        <h2>Explorador de Archivos</h2>
+            <div class="storage-info">
+                <div class="storage-item">
+                    <span class="icon">💾</span>
+                    <span id="diskTotal">Almacenamiento Total: </span>
+                </div>
+                <div class="storage-item">
+                    <span class="icon">📊</span>
+                    <span id="diskUsed">Almacenamiento Usado: </span>
+                </div>
+                <div class="storage-item">
+                    <span class="icon">✅</span>
+                    <span id="diskFree">Almacenamiento Disponible: </span>
+                </div>
+            </div>
+
+            <style>
+            .storage-info { display: flex; gap: 20px; flex-wrap: wrap; }
+            .storage-item { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+            .icon { font-size: 24px; }
+            </style>
+
+
+
+        <div class="root-input-group">
+            <input type="text" id="rootPath" placeholder="/home/usuario/documentos" />
+            <button id="setRootBtn" class="btn btn-primary">Establecer Raíz</button>
+           
+            <span id="currentRoot" class="current-root"></span>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="file-explorer">
+        <div class="explorer-header">
+            <button id="backBtn" class="btn btn-sm" title="Atrás">← Atrás</button>
+            <div class="breadcrumb" id="breadcrumb"></div>
+            <div class="header-actions">
+                <button id="createFolderBtn" class="btn btn-sm" title="Nueva carpeta">
+                    📁 Crear Carpeta
+                </button>
+                <button id="uploadBtn" class="btn btn-sm" title="Subir archivo">
+                    📤 Subir Archivo
+                </button>
+                <input type="file" id="fileInput" hidden multiple />
+            </div>
+        </div>
+
+        <!-- Contenido -->
+        <div class="explorer-content">
+            <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+            <p id="nameFileUp"></p>
+            <!-- Carpetas -->
+            <div class="items-section">
+                <div id="foldersContainer" class="items-container folders-container"></div>
+            </div>
+
+            <!-- Archivos -->
+            <div class="items-section">
+                <div id="filesContainer" class="items-container files-container"></div>
+            </div>
+
+            <!-- Mensaje cuando está vacío -->
+            <div id="emptyMessage" class="empty-message" style="display: none;">
+                📭 La carpeta está vacía
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para crear carpeta -->
+<div id="folderModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Crear Nueva Carpeta</h3>
+        <input type="text" id="folderNameInput" placeholder="Nombre de la carpeta" />
+        <div class="modal-actions">
+            <button id="createFolderConfirm" class="btn btn-primary">Crear</button>
+            <button id="createFolderCancel" class="btn btn-secondary">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para renombrar -->
+<div id="renameModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Renombrar</h3>
+        <input type="text" id="renameInput" placeholder="Nuevo nombre" />
+        <div class="modal-actions">
+            <button id="renameConfirm" class="btn btn-primary">Renombrar</button>
+            <button id="renameCancel" class="btn btn-secondary">Cancelar</button>
+        </div>
+    </div>
+</div>
+    
+</body>
+
+<script src="{{ url_for('static', filename='js/file_explorer.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+{% endblock %}

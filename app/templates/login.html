@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Acceso</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+
+<body class="login-page">
+    <form method="post" class="login-card">
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <h1 class="span-login"><span style="padding:3px;"><img src="https://cdn.iconscout.com/icon/free/png-256/free-raspberry-pi-icon-svg-download-png-14548615.png" width="25px" height="25px" alt=""></span>Raspberry Admin</h1>
+
+       
+        <p style="text-align: center;">Gestión avanzada de tu dispositivo</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <label for="username">Usuario</label>
+        <input id="username"
+               type="text"
+               name="username"
+               autocomplete="username"
+               required>
+
+        <label for="password">Contraseña</label>
+        <input id="password"
+               type="password"
+               name="password"
+               autocomplete="current-password"
+               required>
+
+        <button type="submit" class="button button-primary">
+            Iniciar sesión
+        </button>
+    </form>
+</body>
+</html>

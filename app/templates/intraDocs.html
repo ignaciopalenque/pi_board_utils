@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+{% extends "base.html" %}
+{% block content %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="description"
+    content="Repositorio personal de documentación y apuntes de ciberseguridad"
+  >
+
+  <title>Repo-Tech</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/intraDocs.css') }}">
+</head>
+
+<body>
+  <header class="cabecera">
+    
+    <div class="cabecera-contenido">
+      <div>
+        <h1 class="titulo">Repositorio Tech</h1>
+        <p>Apuntes, manuales y documentación técnica</p>
+      </div>
+    <span><img src="{{ url_for('static', filename='img/icon.png') }}" alt="" width="100px" height="auto" style="margin: auto;"></span> 
+    
+
+
+   
+  
+    </div>
+  </header>
+
+  <main class="contenedor">
+    <section class="panel filtros">
+      <div class="campo campo-busqueda">
+        <label for="buscador">Buscar</label>
+
+        <input
+          id="buscador"
+          type="search"
+          placeholder="Título, etiqueta o descripción..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="campo">
+        <label for="filtroCategoria">Categoría</label>
+
+        <select id="filtroCategoria">
+          <option value="">Todas las categorías</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="filtroEtiqueta">Etiqueta</label>
+
+        <select id="filtroEtiqueta">
+          <option value="">Todas las etiquetas</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="ordenar">Ordenar por</label>
+
+        <select id="ordenar">
+          <option value="titulo-asc">Título A-Z</option>
+          <option value="titulo-desc">Título Z-A</option>
+          <option value="categoria-asc">Categoría A-Z</option>
+          <option value="fecha-desc">Más recientes</option>
+          <option value="fecha-asc">Más antiguos</option>
+          <option value="favoritos">Favoritos primero</option>
+        </select>
+      </div>
+
+      <div class="filtros-acciones">
+        <label class="check-favoritos">
+          <input type="checkbox" id="soloFavoritos">
+          Solo favoritos
+        </label>
+
+        <div>
+         <button id="uploadBtn" class="boton boton-secundario" title="Subir archivo">
+            📤 Elegir indice documental
+        </button>
+
+        <button id="limpiarFiltros" class="boton boton-secundario">
+          Limpiar filtros
+        </button>
+
+
+        </div>
+
+   
+      </div>
+    </section>
+
+    <section class="resumen">
+      <div>
+        <strong id="contador">0 documentos</strong>
+        <span id="estadoCarga">Cargando documentación...</span>
+      </div>
+
+      <div id="leyendaFavoritos" class="leyenda">
+        ★ Favorito
+      </div>
+    </section>
+
+    <section class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th>Favorito</th>
+            <th>Documento</th>
+            <th>Categoría</th>
+            <th>Etiquetas</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody id="listaDocumentos"></tbody>
+      </table>
+
+      <div id="estadoVacio" class="estado-vacio oculto">
+        No se encontraron documentos con los filtros seleccionados.
+      </div>
+    </section>
+  </main>
+
+  <div id="modalPDF" class="modal oculto" role="dialog" aria-modal="true">
+    <div class="modal-contenido">
+      <div class="modal-cabecera">
+        <h2 id="tituloPDF">Vista previa</h2>
+
+        <button id="cerrarModal" class="boton-cerrar" aria-label="Cerrar">
+          &times;
+        </button>
+      </div>
+
+      <iframe id="visorPDF" title="Vista previa del documento PDF"></iframe>
+    </div>
+  </div>
+
+  <footer class="pie">
+    Repositorio personal de documentación técnica en el ámbito de la tecnología de la información
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/intraDocs.js') }}" defer></script>
+
+</body>
+{% endblock %}
+
+</html>

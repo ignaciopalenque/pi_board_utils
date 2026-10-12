@@ -1,0 +1,394 @@
+:root {
+  --fondo: #0f172a;
+  --superficie: #1e293b;
+  --superficie-secundaria: #263449;
+  --texto: #e2e8f0;
+  --texto-secundario: #94a3b8;
+  --borde: #475569;
+  --principal: #2563eb;
+  --principal-hover: #1d4ed8;
+  --cabecera: #020617;
+  --favorito: #eab308;
+  --sombra: 0 4px 15px rgb(0 0 0 / 30%);
+  --full-bg-dark-border:#615d67;
+
+}
+
+
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  color: var(--texto);
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo);
+  transition: background 0.2s, color 0.2s;
+}
+
+body.sin-scroll {
+  overflow: hidden;
+}
+
+
+
+
+.cabecera-contenido {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: min(1400px, 94%);
+  min-height: 170px;
+  margin: auto;
+  padding: 30px 0;
+  border: 1px solid var(--full-bg-dark-border);
+  color: white;
+  background: var(--cabecera);
+
+}
+
+.cabecera h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+.titulo {
+  margin: 0;
+  font-family: "Gochi Hand", monospace, sans-serif;
+  font-size: clamp(4rem, 6vw, 8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+
+  background: linear-gradient(to bottom, #3b82f6, #22c55e);
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.cabecera p {
+  margin: 0;
+  color: #bfdbfe;
+}
+
+.contenedor {
+  width: min(1400px, 94%);
+  margin: 30px auto;
+}
+
+.panel {
+  padding: 22px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  box-shadow: var(--sombra);
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 15px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo label {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 11px 12px;
+  color: var(--texto);
+  font: inherit;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+}
+
+input:focus,
+select:focus,
+button:focus,
+a:focus {
+  outline: 3px solid rgb(37 99 235 / 30%);
+  outline-offset: 2px;
+}
+
+.filtros-acciones {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding-top: 5px;
+}
+
+.check-favoritos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.check-favoritos input {
+  width: auto;
+}
+
+.boton {
+  display: inline-block;
+  padding: 9px 13px;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  border-radius: 6px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.boton:hover {
+  transform: translateY(-1px);
+}
+
+.boton-primario {
+  color: white;
+  background: var(--principal);
+}
+
+.boton-primario:hover {
+  background: var(--principal-hover);
+}
+
+.boton-secundario {
+  color: var(--texto);
+  background: var(--superficie-secundaria);
+  border: 1px solid var(--borde);
+}
+
+.boton-tema {
+  width: 45px;
+  height: 45px;
+  font-size: 1.3rem;
+  color: white;
+  background: rgb(255 255 255 / 12%);
+  border: 1px solid rgb(255 255 255 / 30%);
+}
+
+.resumen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 20px 0 12px;
+  color: var(--texto-secundario);
+}
+
+.resumen strong {
+  margin-right: 10px;
+  color: var(--texto);
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  box-shadow: var(--sombra);
+}
+
+table {
+  width: 100%;
+  min-width: 950px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 15px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--borde);
+}
+
+th {
+  color: white;
+  background: #1e3a8a;
+}
+
+tr:hover td {
+  background: var(--superficie-secundaria);
+}
+
+td strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+td small {
+  display: block;
+  max-width: 330px;
+  color: var(--texto-secundario);
+  line-height: 1.4;
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: 240px;
+}
+
+.etiqueta {
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  color: #1e40af;
+  background: #dbeafe;
+  border-radius: 20px;
+}
+
+.boton-favorito {
+  padding: 0;
+  color: var(--texto-secundario);
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
+.boton-favorito.activo {
+  color: var(--favorito);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.acciones .boton {
+  font-size: 0.85rem;
+}
+
+.leyenda {
+  color: var(--favorito);
+}
+
+.estado-vacio {
+  padding: 45px 20px;
+  color: var(--texto-secundario);
+  text-align: center;
+}
+
+.oculto {
+  display: none !important;
+}
+
+.modal {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgb(0 0 0 / 75%);
+}
+
+.modal-contenido {
+  display: flex;
+  flex-direction: column;
+  width: min(1100px, 100%);
+  height: min(850px, 95vh);
+  overflow: hidden;
+  background: var(--superficie);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 40%);
+}
+
+.modal-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.modal-cabecera h2 {
+  overflow: hidden;
+  margin: 0;
+  font-size: 1.1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boton-cerrar {
+  color: var(--texto);
+  font-size: 1.8rem;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
+#visorPDF {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.pie {
+  padding: 30px 20px;
+  color: var(--texto-secundario);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .cabecera-contenido {
+    align-items: flex-start;
+  }
+
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros-acciones {
+    grid-column: auto;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .resumen {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tabla-contenedor {
+    margin-right: -3%;
+    margin-left: -3%;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+}

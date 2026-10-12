@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <h1>Dashboard</h1>
+        <p>Estado actual de la Raspberry Pi</p>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card blue">
+        <span class="stat-label">CPU</span>
+        <strong id="cpu-value">--</strong>
+        <small>Uso del procesador</small>
+    </div>
+
+    <div class="stat-card green">
+        <span class="stat-label">RAM</span>
+        <strong id="memory-value">--</strong>
+        <small>Memoria utilizada</small>
+    </div>
+
+    <div class="stat-card orange">
+        <span class="stat-label">Disco</span>
+        <strong id="disk-value">--</strong>
+        <small>Almacenamiento utilizado</small>
+    </div>
+
+    <div class="stat-card red">
+        <span class="stat-label">Temperatura</span>
+        <strong id="temperature-value">--</strong>
+        <small>Temperatura de la CPU</small>
+    </div>
+</div>
+
+<div class="content-grid">
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Información del dispositivo</h2>
+        </div>
+
+        <div class="info-list">
+            <div>
+                <span>Hostname</span>
+                <strong id="hostname-value">--</strong>
+            </div>
+
+            <div>
+                <span>Sistema</span>
+                <strong id="platform-value">--</strong>
+            </div>
+
+            <div>
+                <span>Red recibida</span>
+                <strong id="network-rx-value">--</strong>
+            </div>
+
+            <div>
+                <span>Red enviada</span>
+                <strong id="network-tx-value">--</strong>
+            </div>
+
+            <div>
+                <span>Plan de energia</span>
+                <strong id="energy-value">--</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Top procesos en ejecución</h2>
+        </div>
+        <div class="info-list">
+
+             <table >
+
+                <thead>
+                    <tr>
+                    <th>PID</th>
+                    <th>Proceso</th>
+                    <th>CPU %</th>
+                    <th>RAM (MB)</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaProcesos">
+                 
+                </tbody>
+            </table>
+     
+        </div>
+    </div>
+
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Estimación aproximada costes de energia del dispositivo</h2>
+        </div>
+
+        <div class="info-list">
+            <div>
+                <span>Coste</span>
+                <strong id="cost-value">--</strong>
+            </div>
+
+            <div>
+                <span>Coste por 24h</span>
+                <strong id="cost-24-value">--</strong>
+            </div>
+
+            <div>
+                <span>Coste mensual</span>
+                <strong id="cost-m-value">--</strong>
+            </div>
+
+            <div>
+                <span>Coste anual</span>
+                <strong id="cost-a-value">--</strong>
+            </div>
+
+        
+        </div>
+    </div>
+    
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Accesos rápidos</h2>
+        </div>
+
+        <a class="quick-link"
+           href="{{ url_for('shortcuts.index') }}">
+            <span>⚡</span>
+            <span>Gestionar accesos directos</span>
+        </a>
+
+        <a class="quick-link"
+           href="{{ url_for('intranet.intranetDocs') }}">
+            <span>📚</span>
+            <span>Abrir documentos</span>
+        </a>
+        <a class="quick-link" href="{{ url_for('files.explorer') }}" >
+             📁 Explorador de archivos
+        </a>
+
+        <a class="quick-link"
+           href="{{ url_for('dashboard.get_clipboard_html') }}">
+            <span>📋</span>
+            <span>Abrir portapapeles y notas</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadMetrics() {
+    try {
+        const response = await fetch(
+            "{{ url_for('dashboard.metrics') }}"
+        );
+
+        const data = await response.json();
+
+        document.getElementById("cpu-value").textContent =
+            `${data.cpu.toFixed(1)} %`;
+
+        document.getElementById("memory-value").textContent =
+            `${data.memory.toFixed(1)} %`;
+
+        document.getElementById("disk-value").textContent =
+            `${data.disk.toFixed(1)} %`;
+
+        document.getElementById("temperature-value").textContent =
+            data.temperature === null
+                ? "N/D"
+                : `${data.temperature.toFixed(1)} °C`;
+
+        document.getElementById("hostname-value").textContent =
+            data.hostname;
+
+        document.getElementById("platform-value").textContent =
+            data.platform;
+
+        document.getElementById("network-rx-value").textContent =
+            formatBytes(data.network_rx);
+
+        document.getElementById("network-tx-value").textContent =
+            formatBytes(data.network_tx);
+
+        document.getElementById("energy-value").textContent = data.plan;
+
+      
+        tbody = document.getElementById("tablaProcesos")
+        tbody.innerHTML = ""
+        data.process.forEach((proc, index) => {
+        const rank = index + 1;
+        const rankColor = getRankColor(rank);
+        const cpuColor = getCpuColor(proc.cpu_percent);
+        
+        // Crear la fila
+        const row = document.createElement('tr');
+        row.dataset.pid = proc.pid; // Para seleccíón fácil
+        
+        // HTML de la fila (puedes usar un template literal como string)
+        row.innerHTML = `
+            <td style="padding:12px;" >${proc.pid}</td>
+
+            <td>
+                <div>
+                    <span style="padding:14px;" >${escapeHtml(proc.name)}</span>
+                </div>
+            </td>
+            <td>
+                <div>
+                    <div>
+                        <div 
+                             style="width: auto; background: ${cpuColor};"></div>
+                    </div>
+                    <span style="padding:12px; color:${cpuColor};">${proc.cpu_percent}%</span>
+                </div>
+            </td>
+            <td><span>${proc.memory_mb} MB</span></td>
+        `;
+        
+        // 4. Agregar la fila al tbody
+        tbody.appendChild(row);
+    });
+
+    } catch (error) {
+        console.error("No se pudieron cargar las métricas", error);
+    }
+}
+
+async function loadMetricsCost() {
+    try {
+        const response = await fetch(
+            "{{ url_for('dashboard.powerCost') }}"
+        );
+        const data = await response.json();
+        console.log(data)
+
+        document.getElementById("cost-value").textContent = data.cost.cost + " €";
+        document.getElementById("cost-24-value").textContent = data.cost_24.cost_24 + " €";
+        document.getElementById("cost-m-value").textContent = data.cost_mensual.cost_mensual + " €";
+        document.getElementById("cost-a-value").textContent = data.cost_anual.cost_anual + " €";
+
+    } catch (error) {
+        console.error("No se pudieron cargar las métricas", error);
+    }
+}
+
+// Funciones auxiliares
+function getRankColor(rank) {
+    if (rank === 1) return 'var(--pi-red)';
+    if (rank === 2) return '#FF6B35';
+    if (rank === 3) return '#FF9800';
+    return 'var(--md-sys-color-outline)';
+}
+
+function getCpuColor(cpuPercent) {
+    if (cpuPercent > 50) return 'var(--pi-red)';
+    if (cpuPercent > 25) return '#FF9800';
+    return '#4CAF50';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatBytes(value) {
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let index = 0;
+    let number = value;
+
+    while (number >= 1024 && index < units.length - 1) {
+        number /= 1024;
+        index++;
+    }
+
+    return `${number.toFixed(1)} ${units[index]}`;
+}
+
+loadMetrics();
+loadMetricsCost();
+setInterval(loadMetrics, 10000);
+</script>
+{% endblock %}

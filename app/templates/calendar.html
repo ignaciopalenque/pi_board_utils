@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<header>
+
+    <div class="page-heading">
+    <div>
+        <h1>Calendario</h1>
+        <p>Calendario con gestión de tareas y proyectos</p>
+    </div>
+    <div class="page-heading">
+  <button type="button"  class="boton-filtro" style="padding: 4px; margin: 3px; text-align: center;" id="new-task-btn">
+        ➕ Tarea
+    </button>
+
+    <a href="{{ url_for('calendar.viewFilter') }}" class="boton-filtro" style="padding: 4px; margin: 3px; text-align: center;">🔍 Filtrar tareas</a>
+
+    </div>
+  
+</div>
+
+<div class="calendar-legend">
+    <div class="calendar-legend"><i class="legend-dot pending" ></i><span id="totalPendientes" >Pendiente</span></div>
+    <div class="calendar-legend"><i class="legend-dot progress" ></i><span id="totalEnProgreso" >En progreso</span></div>
+    <div class="calendar-legend"><i class="legend-dot completed" ></i><span id="totalCompletadas" >Completada</span></div>
+</div>
+
+
+
+
+</header>
+
+
+<body data-color-scheme="dark">
+
+    <div id="calendar"></div>
+
+<dialog id="task-dialog">
+    <form id="task-form">
+        <h2 id="dialog-title">Nueva tarea</h2><br>
+
+        <input type="hidden" id="task-id">
+
+        <label for="task">Tarea *</label>
+        <input
+            type="text"
+            id="task"
+            maxlength="150"
+            required
+            placeholder="Ej. Revisar consumo"
+        ><br>
+
+        <label for="project">Proyecto *</label>
+        <input
+            type="text"
+            id="project"
+            maxlength="150"
+            required
+            placeholder="Nombre del proyecto"
+        ><br>
+
+        <label for="description">Descripción</label>
+        <textarea
+            id="description"
+            rows="3"
+            placeholder="Detalles de la tarea..."
+        ></textarea><br>
+
+        <label for="status">Estado</label>
+        <select id="status">
+            <option value="pendiente">Pendiente</option>
+            <option value="en_progreso">En progreso</option>
+            <option value="completada">Completada</option>
+        </select><br>
+
+        <label for="task-date">Fecha *</label>
+        <input type="date" id="task-date" required><br>
+
+        <p id="form-error" role="alert"></p>
+
+        <div class="dialog-actions">
+            <button type="button" id="cancel-btn">
+                Cancelar
+            </button>
+
+            <button type="button" id="delete-btn" hidden>
+                Eliminar
+            </button>
+
+            <button type="submit" id="save-btn">
+                Guardar tarea
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/skeleton.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/theme.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/palettes/purple.css"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/all/global.js"></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/global.js">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div
+    id="calendar-config" 
+    data-tasks-url="{{ url_for('calendar.get_tasks') }}">
+</div>
+
+<script src="{{ url_for('static', filename='js/calendar.js') }}" defer></script>
+
+
+
+</body>
+
+
+
+{% endblock %}
+</html>

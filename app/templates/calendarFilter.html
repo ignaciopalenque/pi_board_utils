@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<header>
+
+    <div class="page-heading">
+    <div>
+        <h1>Calendario</h1>
+        <p>Vista de filtros</p>
+    </div>
+    <div class="page-heading">
+
+    <a type="button" href="{{ url_for('calendar.view') }}" style="padding: 3px; margin: 3px;" class="boton-filtro" id="filter-task-btn">
+        🔍 Volver al calendario
+    </a>
+
+    </div>
+  
+</div>
+
+
+
+
+</header>
+
+
+<body>
+
+<section class="calendar-tasks">
+  <div class="calendar-tasks__filters">
+    <label class="calendar-tasks__field">
+      Proyecto
+      <select id="filtroProyecto">
+        <option value="">Todos</option>
+      </select>
+    </label>
+
+    <label class="calendar-tasks__field">
+      Fecha
+      <input type="date" id="filtroFecha">
+    </label>
+
+    <label class="calendar-tasks__field">
+      Estado
+      <select id="filtroEstado">
+        <option value="">Todos</option>
+      </select>
+    </label>
+
+    <button
+      type="button"
+      id="limpiarFiltros"
+      class="calendar-tasks__clear"
+    >
+      Limpiar filtros
+    </button>
+  </div>
+
+  <p id="mensajeTabla" class="calendar-tasks__message" aria-live="polite"></p>
+
+  <div class="calendar-tasks__table-wrapper">
+    <table class="calendar-tasks__table">
+      <thead>
+        <tr>
+          <th>Tarea</th>
+          <th>Proyecto</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody id="tablaTareas"></tbody>
+    </table>
+  </div>
+</section>
+
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/skeleton.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/theme.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/palettes/purple.css"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/all/global.js"></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/global.js">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div
+    id="calendar-config" 
+    data-tasks-url="{{ url_for('calendar.get_tasks') }}">
+</div>
+
+<script src="{{ url_for('static', filename='js/calendar.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/calendarFilter.js') }}" defer></script>
+
+
+
+</body>
+
+
+
+{% endblock %}
+</html>

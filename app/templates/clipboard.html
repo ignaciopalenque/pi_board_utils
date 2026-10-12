@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<section class="clipboard-section">
+    <h2>Portapapeles de red</h2>
+    <p id="clipboardStatus" class="status">Última actualización: cargando...</p>
+
+    <textarea id="clipboard" placeholder="Escribe o pega aquí el contenido..." maxlength="10000"></textarea>
+
+    <div class="clipboard-buttons">
+        <button id="loadClipboardButton">
+            ↻ Recargar
+        </button>
+
+        <button id="saveClipboardButton" class="primary">
+            💾 Guardar
+        </button>
+
+        <button id="copyClipboardButton">
+            📋 Copiar localmente
+        </button>
+    </div>
+
+    <!-- Sección de traducción -->
+    <div class="translation-section">
+        <h3>📌 Notas</h3>
+        
+        <div class="translation-controls">
+            <select id="languageSelector">
+                <option value="">Selecciona un idioma...</option>
+                <option value="es">Español</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="it">Italiano</option>
+                <option value="pt">Português</option>
+                <option value="ja">日本語</option>
+                <option value="zh">中文</option>
+                <option value="ru">Русский</option>
+                <option value="ar">العربية</option>
+                <option value="ko">한국어</option>
+                <option value="pl">Polski</option>
+                <option value="nl">Nederlands</option>
+                <option value="tr">Türkçe</option>
+                <option value="vi">Tiếng Việt</option>
+            </select>
+
+            <button id="translateButton">
+                🌐 Traducir
+            </button>
+        </div>
+
+        <textarea id="translatedText" placeholder="Aquí aparecerá el texto traducido..." readonly></textarea>
+        
+        <button id="copyTranslatedButton" style="margin-top: 10px;">
+            📋 Copiar traducción
+        </button>
+
+        <p style="font-size: 12px; color: white; margin-top: 8px;">
+            💡 <strong>Atajos:</strong> Ctrl+Enter para guardar | Ctrl+Shift+Enter para traducir
+        </p>
+    </div>
+
+</section>
+    <script src="{{ url_for('static', filename='js/clipboard.js') }}"></script>
+
+{% endblock %}
