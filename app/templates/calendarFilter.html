@@ -19,7 +19,7 @@
     <div class="page-heading">
 
     <a type="button" href="{{ url_for('calendar.view') }}" style="padding: 3px; margin: 3px;" class="boton-filtro" id="filter-task-btn">
-        🔍 Volver al calendario
+        ↩️ Volver al calendario
     </a>
 
     </div>
@@ -34,6 +34,68 @@
 
 <body>
 
+<dialog id="task-dialog">
+    <form id="task-form">
+        <h2 id="dialog-title">Nueva tarea</h2><br>
+
+        <input type="hidden" id="task-id">
+
+        <label for="task">Tarea *</label>
+        <input
+            type="text"
+            id="task"
+            maxlength="150"
+            required
+            placeholder="Ej. Revisar consumo"
+        ><br>
+
+        <label for="project">Proyecto *</label>
+        <input
+            type="text"
+            id="project"
+            maxlength="150"
+            required
+            placeholder="Nombre del proyecto"
+        ><br>
+
+        <label for="description">Descripción</label>
+        <textarea
+            id="description"
+            rows="3"
+            placeholder="Detalles de la tarea..."
+        ></textarea><br>
+
+        <label for="status">Estado</label>
+        <select id="status">
+            <option value="pendiente">Pendiente</option>
+            <option value="en_progreso">En progreso</option>
+            <option value="completada">Completada</option>
+        </select><br>
+
+        <label for="task-date">Fecha Inicio</label>
+        <input type="date" id="task-date-inicio" required><br>
+
+        <label for="task-date">Fecha Fin</label>
+        <input type="date" id="task-date-fin" required><br>
+
+        <p id="form-error" role="alert"></p>
+
+        <div class="dialog-actions">
+            <button type="button" id="cancel-btn">
+                Cancelar
+            </button>
+
+            <button type="button" id="delete-btn" hidden>
+                Eliminar
+            </button>
+
+            <button type="submit" id="save-btn">
+                Guardar tarea
+            </button>
+        </div>
+    </form>
+</dialog>
+
 <section class="calendar-tasks">
   <div class="calendar-tasks__filters">
     <label class="calendar-tasks__field">
@@ -44,9 +106,15 @@
     </label>
 
     <label class="calendar-tasks__field">
-      Fecha
-      <input type="date" id="filtroFecha">
+      Fecha Incio
+      <input type="date" id="filtroFechaInicio">
     </label>
+
+    <label class="calendar-tasks__field">
+      Fecha Fin
+      <input type="date" id="filtroFechaFin">
+    </label>
+
 
     <label class="calendar-tasks__field">
       Estado
@@ -74,7 +142,9 @@
           <th>Proyecto</th>
           <th>Descripción</th>
           <th>Estado</th>
-          <th>Fecha</th>
+          <th>Fecha Inicio</th>
+          <th>Fecha Fin</th>
+
         </tr>
       </thead>
       <tbody id="tablaTareas"></tbody>
@@ -103,14 +173,13 @@
 <script
     src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/global.js">
 </script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ url_for('static', filename='js/sweetalert.js') }}" defer></script>
 
 <div
     id="calendar-config" 
     data-tasks-url="{{ url_for('calendar.get_tasks') }}">
 </div>
 
-<script src="{{ url_for('static', filename='js/calendar.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/calendarFilter.js') }}" defer></script>
 
 

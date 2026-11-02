@@ -4,7 +4,7 @@
     "name": "Encender PC",
     "icon": "power",
     "type": "wakeonlan",
-    "mac": "AA:BB:CC:DD:EE:FF",
+    "mac": "00:1f:16:36:63:0a",
     "role": "user",
     "confirm": false
   },

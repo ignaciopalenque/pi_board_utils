@@ -1,5 +1,22 @@
-/app/static/documentos
-/app/static/json
-instance
-.db
-.venv
+# Directorios compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Entornos virtuales
+.venv/
+venv/
+
+# Variables de entorno
+.env
+.env.local
+
+# Base de datos
+*.db
+
+# Archivos del proyecto
+/instance/
+/app/static/documentos/
+/app/static/json/
+

@@ -49,7 +49,7 @@ def get_tasks():
         except ValueError:
             return jsonify({"error": "Fecha inicial inválida"}), 400
 
-        stmt = stmt.where(CalendarTask.task_date >= start_date)
+        stmt = stmt.where(CalendarTask.start_date >= start_date)
 
     if end:
         try:
@@ -58,10 +58,10 @@ def get_tasks():
             return jsonify({"error": "Fecha final inválida"}), 400
 
         # FullCalendar utiliza normalmente un final exclusivo.
-        stmt = stmt.where(CalendarTask.task_date < end_date)
+        stmt = stmt.where(CalendarTask.end_date < end_date)
 
     tasks = db.session.execute(
-        stmt.order_by(CalendarTask.task_date)
+        stmt.order_by(CalendarTask.start_date)
     ).scalars().all()
 
     events = []
@@ -70,7 +70,8 @@ def get_tasks():
         events.append({
             "id": str(task.id),
             "title": task.task,
-            "start": task.task_date.isoformat(),
+            "start": task.start_date.isoformat(),
+            "end" :  task.end_date.isoformat(),
             "allDay": True,
             "backgroundColor": {
                 "pendiente": "#64748b",
@@ -100,17 +101,25 @@ def create_task():
     project = data.get("project", "").strip()
     description = data.get("description", "").strip()
     status = data.get("status", "pendiente")
-    raw_date = data.get("task_date", "")
+    raw_date_start = data.get("start_date", "")
 
-    raw_date = data.get("task_date")
+    raw_date_end = data.get("end_date")
 
-    if not isinstance(raw_date, str) or not raw_date.strip():
+    if not isinstance(raw_date_start, str) or not raw_date_start.strip():
         return jsonify({
             "error": "La fecha de la tarea es obligatoria."
         }), 400
 
+
+    if not isinstance(raw_date_end, str) or not raw_date_end.strip():
+        return jsonify({
+            "error": "La fecha de la tarea es obligatoria."
+        }), 4    
+
     try:
-        task_date = date.fromisoformat(raw_date.strip())
+        start_date = date.fromisoformat(raw_date_start.strip())
+        end_date = date.fromisoformat(raw_date_end.strip())
+
     except ValueError:
         return jsonify({
             "error": "Fecha no válida. Utiliza el formato YYYY-MM-DD."
@@ -121,7 +130,8 @@ def create_task():
         project=project,
         description=description,
         status=status,
-        task_date=task_date,
+        start_date=start_date,
+        end_date=end_date
     )
 
     try:
@@ -142,7 +152,7 @@ def update_task(task_id):
         return jsonify({"error": "Tarea no encontrada."}), 404
 
     data = request.get_json(silent=True) or {}
-
+    print(data)
     if "task" in data:
         name = data["task"]
 
@@ -175,9 +185,15 @@ def update_task(task_id):
 
         task.status = status
 
-    if "task_date" in data:
+    if "start_date" in data:
         try:
-            task.task_date = date.fromisoformat(data["task_date"])
+            task.start_date = date.fromisoformat(data["start_date"])
+        except (ValueError, TypeError):
+            return jsonify({"error": "La fecha no es válida."}), 400
+
+    if "end_date" in data:
+        try:
+            task.end_date = date.fromisoformat(data["end_date"])
         except (ValueError, TypeError):
             return jsonify({"error": "La fecha no es válida."}), 400
 

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+    <div class="page-heading">
+      <div>
+        <h1>Notas</h1>
+        <p>Listado de notas</p>
+      </div>
+    <div class="page-heading">
+    <a type="button" href="{{ url_for('dashboard.get_clipboard_html') }}" style="padding: 3px; margin: 3px;" class="boton-filtro" id="filter-task-btn">
+        ↩️ Volver atrás
+    </a>
+
+    </div>
+  
+  </div>
+    <div class="translation-section">
+       
+
+
+    </div>
+    <dialog id="notaDialog" class="modal-dialog">
+        <div class="modal-header">
+            <h2 id="modalTitle">Título de la nota</h2>
+            <button class="modal-close" onclick="document.getElementById('notaDialog').close()">✕</button>
+            
+        </div>
+        
+        <div class="modal-content">
+            <small id="modalDate" style="padding: 10px;">Fecha...</small>
+            <textarea cols="55" rows="50" id="modalBody">Contenido de la nota...</textarea>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-secondary" onclick="document.getElementById('notaDialog').close()">
+                Cerrar
+            </button>
+            <button id="btnUpdNote" class="modal-btn modal-btn-primary">Editar</button>
+            <button id="btnDelNote" class="modal-btn modal-btn-danger">Eliminar</button>
+        </div>
+    </dialog>
+
+</body>
+  <script src="{{ url_for('static', filename='js/notes.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/sweetalert.js') }}" defer></script>
+
+{% endblock %}

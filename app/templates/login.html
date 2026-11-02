@@ -16,7 +16,7 @@
                name="csrf_token"
                value="{{ csrf_token() }}">
 
-        <h1 class="span-login"><span style="padding:3px;"><img src="https://cdn.iconscout.com/icon/free/png-256/free-raspberry-pi-icon-svg-download-png-14548615.png" width="25px" height="25px" alt=""></span>Raspberry Admin</h1>
+        <h1 class="span-login"><span style="padding:3px;"><img src="{{ url_for('static', filename='img/free-raspberry-pi-icon-svg-download-png-14548615.png') }}" width="25px" height="25px" alt=""></span>Raspberry Admin</h1>
 
        
         <p style="text-align: center;">Gestión avanzada de tu dispositivo</p>

@@ -45,7 +45,7 @@
     <!-- Navegación -->
     <div class="file-explorer">
         <div class="explorer-header">
-            <button id="backBtn" class="btn btn-sm" title="Atrás">← Atrás</button>
+            <button id="backBtn" class="btn btn-sm" title="Atrás">↩️ Atrás</button>
             <div class="breadcrumb" id="breadcrumb"></div>
             <div class="header-actions">
                 <button id="createFolderBtn" class="btn btn-sm" title="Nueva carpeta">
@@ -107,7 +107,7 @@
 </body>
 
 <script src="{{ url_for('static', filename='js/file_explorer.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ url_for('static', filename='js/sweetalert.js') }}" defer></script>
 
 
 {% endblock %}

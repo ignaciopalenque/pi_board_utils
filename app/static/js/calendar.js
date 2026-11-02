@@ -12,7 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const projectInput = document.getElementById("project");
     const descriptionInput = document.getElementById("description");
     const statusInput = document.getElementById("status");
-    const dateInput = document.getElementById("task-date");
+    const dateInputInicio = document.getElementById("task-date-inicio");
+    const dateInputFin = document.getElementById("task-date-fin");
 
     const titleEl = document.getElementById("dialog-title");
     const errorEl = document.getElementById("form-error");
@@ -67,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
             "Total Completadas " + (contador["completada"] || 0);
 
         document.getElementById("totalEnProgreso").textContent =
-            "Total En Progreso " + (contador["en progreso"] || 0);
+            "Total En Progreso " + (contador["en_progreso"] || 0);
 
         return contador;
 
@@ -77,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 
     function openNewTask(dateStr = "") {
+        estadoEditComponentes(false)
         form.reset();
 
         taskId.value = "";
@@ -87,7 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
         saveBtn.disabled = false;
         errorEl.textContent = "";
 
-        dateInput.value = dateStr || new Date()
+        dateInputInicio.value = dateStr || new Date()
+            .toLocaleDateString("en-CA");
+        dateInputFin.value = dateStr || new Date()
             .toLocaleDateString("en-CA");
 
         statusInput.value = "pendiente";
@@ -98,7 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function openEditTask(event) {
         selectedEvent = event;
-
         taskId.value = event.id;
         taskInput.value = event.title;
         projectInput.value = event.extendedProps.project || "";
@@ -106,16 +109,51 @@ document.addEventListener("DOMContentLoaded", () => {
             event.extendedProps.description || "";
         statusInput.value =
             event.extendedProps.status || "pendiente";
-        dateInput.value = event.startStr;
+        dateInputInicio.value = event.startStr;
+        dateInputFin.value = event.endStr;
 
         titleEl.textContent = "Editar tarea";
         deleteBtn.hidden = false;
         saveBtn.disabled = false;
         errorEl.textContent = "";
 
+        if (event.extendedProps.status == "completada"){
+         
+            estadoEditComponentes(true);
+        }
+
         dialog.showModal();
+
+
+
+
+
     }
 
+
+
+    statusInput.addEventListener('change', function() {
+            if(statusInput.value =="completada"){
+                estadoEditComponentes(true)
+            }else{
+                estadoEditComponentes(false)
+
+            }
+        });
+
+    function estadoEditComponentes(estado){
+
+        try {
+            taskInput.disabled = estado;
+            projectInput.disabled = estado;
+            descriptionInput.disabled = estado;
+            dateInputInicio.disabled = estado;
+            dateInputFin.disabled = estado;
+        } catch (error) {
+            
+        }
+
+    }
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: "dayGridMonth",
         locale: "es",
@@ -174,7 +212,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 await api(`${tasksUrl}/${info.event.id}`, {
                     method: "PUT",
                     body: JSON.stringify({
-                        task_date: info.event.startStr.slice(0, 10),
+                        start_date: info.event.startStr.slice(0, 10),
+                        end_date: info.event.endStr.slice(0, 10),
+
                     }),
                 });
 
@@ -209,8 +249,12 @@ document.addEventListener("DOMContentLoaded", () => {
             project: projectInput.value.trim(),
             description: descriptionInput.value.trim(),
             status: statusInput.value,
-            task_date: dateInput.value,
+            start_date: dateInputInicio.value,
+            end_date: dateInputFin.value,
+
         };
+
+        console.log(payload)
 
         const id = taskId.value;
 

@@ -81,8 +81,11 @@
             <option value="completada">Completada</option>
         </select><br>
 
-        <label for="task-date">Fecha *</label>
-        <input type="date" id="task-date" required><br>
+        <label for="task-date-inicio">Fecha Inicio</label>
+        <input type="date" id="task-date-inicio" required><br>
+
+        <label for="task-date-fin">Fecha Fin</label>
+        <input type="date" id="task-date-fin" required><br>
 
         <p id="form-error" role="alert"></p>
 
@@ -104,25 +107,23 @@
 
 <link
     rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/skeleton.css"
+
+    href="{{ url_for('static', filename='css/calendar/skeleton.css') }}""
 >
 
 <link
     rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/theme.css"
+    href="{{ url_for('static', filename='css/calendar/theme.css') }}""
 >
 
 <link
     rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/palettes/purple.css"
+    href="{{ url_for('static', filename='css/calendar/purple.css') }}""
 >
 
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/all/global.js"></script>
-
-<script
-    src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.1/themes/monarch/global.js">
-</script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ url_for('static', filename='js/calendar/global.js') }}"></script>
+<script src="{{ url_for('static', filename='js/calendar/monarch/global.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sweetalert.js') }}" defer></script>
 
 <div
     id="calendar-config" 

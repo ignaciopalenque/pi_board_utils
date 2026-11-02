@@ -7,6 +7,8 @@ from .extensions import db, login_manager, csrf
 from .models import User
 
 
+
+
 def create_app():
     app = Flask(__name__)
 

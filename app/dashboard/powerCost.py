@@ -1,18 +1,19 @@
 import cpuinfo
-import jsonify
+from flask import jsonify 
 import psutil
 import json
 from pathlib import Path
+from datetime import datetime
 from flask import jsonify
+import re
 CONFIG_COST_PATH = Path(__file__).resolve().parent / "config_cost.json"
+CPU_INFO = cpuinfo.get_cpu_info()
 
 class powerGetCost:
 
     @staticmethod
     def get_tdp_smart():
-        CPU_INFO = cpuinfo.get_cpu_info()
         cpu_name = CPU_INFO.get('brand_raw', 'Unknown')
-
         # Lista de CPUs con TDP específicos
         SPECIFIC_TDP = {
             "Xeon E5-2695 v4": 120.0,
@@ -163,5 +164,20 @@ class powerGetCost:
         except:
             output = 0
             return output
+
+
+    @staticmethod
+    def get_boot_time():
+        try:
+            boot_time = psutil.boot_time()
+            uptime = datetime.now() - datetime.fromtimestamp(boot_time)
+            mins = int(uptime.total_seconds() // 60)
+            hours = mins // 60
+            minutes = mins % 60
+            return hours, minutes   
+        except:
+            minutes = 0
+            hours = 0
+            return hours, minutes
 
     

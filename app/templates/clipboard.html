@@ -31,43 +31,89 @@
     <div class="translation-section">
         <h3>📌 Notas</h3>
         
-        <div class="translation-controls">
-            <select id="languageSelector">
-                <option value="">Selecciona un idioma...</option>
-                <option value="es">Español</option>
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="it">Italiano</option>
-                <option value="pt">Português</option>
-                <option value="ja">日本語</option>
-                <option value="zh">中文</option>
-                <option value="ru">Русский</option>
-                <option value="ar">العربية</option>
-                <option value="ko">한국어</option>
-                <option value="pl">Polski</option>
-                <option value="nl">Nederlands</option>
-                <option value="tr">Türkçe</option>
-                <option value="vi">Tiếng Việt</option>
-            </select>
-
-            <button id="translateButton">
-                🌐 Traducir
-            </button>
-        </div>
-
-        <textarea id="translatedText" placeholder="Aquí aparecerá el texto traducido..." readonly></textarea>
+        <input type="text" id="notaTitle" class="notaTitle" placeholder="Escriba aquí el titulo de la nota">
+        <textarea id="notaText" placeholder="Escriba aquí el contenido de la nota" class="notaText"></textarea>
         
-        <button id="copyTranslatedButton" style="margin-top: 10px;">
-            📋 Copiar traducción
+        <button id="guardarNotaButton" style="margin-top: 10px;" class="guardarNotaButton">
+            📋 Guardar nota en texto plano
         </button>
 
-        <p style="font-size: 12px; color: white; margin-top: 8px;">
-            💡 <strong>Atajos:</strong> Ctrl+Enter para guardar | Ctrl+Shift+Enter para traducir
-        </p>
+        <button id="guardarNotaCifrada" style="margin-top: 10px;" class="guardarNotaCifrada">
+            🔐 Guardar nota cifrada con contraseña
+        </button>
+          
+        <div>
+            <h3 style="margin-top: 20px; border-top: 1px solid #555; padding-top:15px;">✍️Notas</h3>
+
+            <a href="{{ url_for('clipboard.viewNotesFilter') }}" class="boton-filtro" style="padding: 4px; margin: 3px; text-align: center;">🔍 Ver notas</a>
+         
+            <p id="notasCount" style="color: #999;">No hay notas</p>
+
+       
+        </div>
+
+        <div>
+            <h3 style="margin-top: 20px; border-top: 1px solid #555; padding-top:15px;">🔐Notas Cifradas</h3>
+
+            <a href="{{ url_for('clipboard.viewNotesFilterPass') }}" class="boton-filtro" style="padding: 4px; margin: 3px; text-align: center;">🔍 Ver notas</a>
+         
+            <p id="notasCripCount" style="color: #999;">No hay notas</p>
+
+       
+        </div>
+
+        <!-- Modal de Contraseña para Notas Cifradas -->
+<dialog id="passwordModal" class="password-modal-dialog">
+    <div class="password-modal-content">
+        <div class="password-modal-header">
+            <h2 class="password-modal-title">Proteger Nota</h2>
+            <button type="button" class="password-modal-close-btn" aria-label="Cerrar">&times;</button>
+        </div>
+
+        <div class="password-modal-body">
+            <p class="password-modal-description">Ingresa una contraseña para cifrar la nota</p>
+
+            <form class="password-form" id="passwordForm">
+                <div class="password-form-group">
+                    <label class="password-form-label">Contraseña</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="passwordInput" class="password-form-input" 
+                               placeholder="Mínimo 8 caracteres" required>
+                        <button type="button" class="password-toggle-btn" id="togglePassword">👁</button>
+                    </div>
+                    <div class="password-strength-indicator">
+                        <div class="password-strength-bar"></div>
+                        <span class="password-strength-text">Fortaleza: —</span>
+                    </div>
+                </div>
+
+                <div class="password-form-group">
+                    <label class="password-form-label">Confirmar Contraseña</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="passwordConfirmInput" class="password-form-input" 
+                               placeholder="Confirma la contraseña" required>
+                        <button type="button" class="password-toggle-btn" id="togglePasswordConfirm">👁</button>
+                    </div>
+                    <span class="password-form-help" id="confirmHelp"></span>
+                </div>
+            </form>
+        </div>
+
+        <div class="password-modal-footer">
+            <button type="button" class="password-modal-btn password-modal-btn-cancel" id="cancelPasswordBtn">Cancelar</button>
+            <button type="submit" form="passwordForm" class="password-modal-btn password-modal-btn-submit" id="submitPasswordBtn">Guardar Cifrada</button>
+        </div>
+    </div>
+</dialog>
+
+
+         
+
     </div>
 
 </section>
     <script src="{{ url_for('static', filename='js/clipboard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/sweetalert.js') }}" defer></script>
+
 
 {% endblock %}

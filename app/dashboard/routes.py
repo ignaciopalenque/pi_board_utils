@@ -4,6 +4,7 @@ import time
 import psutil
 from flask import Blueprint, jsonify, render_template
 from flask_login import login_required
+import cpuinfo
 
 from .powerCost import powerGetCost
 
@@ -27,10 +28,14 @@ def index():
 @dashboard_bp.route("/api/metrics")
 @login_required
 def metrics():
+    CPU_INFO = cpuinfo.get_cpu_info()
     memory = psutil.virtual_memory()
     disk = psutil.disk_usage("/")
     net = psutil.net_io_counters()
     plan = powerGetCost.get_energy_plan()
+    tdp = powerGetCost.get_tdp_smart()
+
+    boot_time_h, boot_time_m = powerGetCost.get_boot_time()
     # Temperatura
     temperature = None
     temps = psutil.sensors_temperatures()
@@ -44,6 +49,8 @@ def metrics():
 
     # Obtener CPU global (intervalo corto)
     cpu_percent = psutil.cpu_percent(interval=0.1)
+    cpu_freq = psutil.cpu_freq().current
+
 
     # Procesos: solo un bucle, sin sleep
     process = []
@@ -70,9 +77,11 @@ def metrics():
         "hostname": socket.gethostname(),
         "platform": platform.platform(),
         "cpu": cpu_percent,
+        "cpu_name": CPU_INFO.get('brand_raw', 'Unknown'),
+        "cpu_freq": cpu_freq,
         "memory": memory.percent,
-        "memory_used": memory.used,
-        "memory_total": memory.total,
+        "memory_used": memory.used / (1024 ** 3),
+        "memory_total": memory.total / (1024 ** 3),
         "disk": disk.percent,
         "disk_free": disk.free,
         "network_rx": net.bytes_recv,
@@ -80,7 +89,10 @@ def metrics():
         "temperature": temperature,
         "uptime": time.time() - psutil.boot_time(),
         "process": top_processes,
-        "plan" : plan
+        "plan" : plan,
+        "boot_time_h": boot_time_h,
+        "boot_time_m": boot_time_m,
+        "tdp": tdp
     })
 
 

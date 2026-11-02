@@ -13,12 +13,16 @@
         <span class="stat-label">CPU</span>
         <strong id="cpu-value">--</strong>
         <small>Uso del procesador</small>
+        <strong id="cpu-freq">--</strong>
+        <small>Frecuencia del procesador</small>
     </div>
 
     <div class="stat-card green">
         <span class="stat-label">RAM</span>
         <strong id="memory-value">--</strong>
         <small>Memoria utilizada</small>
+        <strong id="memory-total">--</strong>
+        <small>Memoria en uso</small>
     </div>
 
     <div class="stat-card orange">
@@ -31,6 +35,8 @@
         <span class="stat-label">Temperatura</span>
         <strong id="temperature-value">--</strong>
         <small>Temperatura de la CPU</small>
+        <strong id="tdp-value">--</strong>
+        <small>TDP de la CPU</small>
     </div>
 </div>
 
@@ -42,8 +48,16 @@
 
         <div class="info-list">
             <div>
+                <span>Tiempo de encendido</span>
+                <strong id="boot-time-value">--</strong>
+            </div>
+            <div>
                 <span>Hostname</span>
                 <strong id="hostname-value">--</strong>
+            </div>
+            <div>
+                <span>CPU</span>
+                <strong id="cpu-name-value">--</strong>
             </div>
 
             <div>
@@ -155,6 +169,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 async function loadMetrics() {
     try {
@@ -166,9 +181,18 @@ async function loadMetrics() {
 
         document.getElementById("cpu-value").textContent =
             `${data.cpu.toFixed(1)} %`;
+        
+        document.getElementById("cpu-freq").textContent =
+            `${data.cpu_freq.toFixed(1)} MHz`;
+
 
         document.getElementById("memory-value").textContent =
             `${data.memory.toFixed(1)} %`;
+
+
+        
+        document.getElementById("memory-total").textContent = 
+            `${data.memory_used.toFixed(1)}  /` + `${data.memory_total.toFixed(1)} GB`;    
 
         document.getElementById("disk-value").textContent =
             `${data.disk.toFixed(1)} %`;
@@ -177,9 +201,19 @@ async function loadMetrics() {
             data.temperature === null
                 ? "N/D"
                 : `${data.temperature.toFixed(1)} °C`;
+        
+        document.getElementById("tdp-value").textContent =
+            data.tdp + " W";
+
+        document.getElementById("boot-time-value").textContent =
+            data.boot_time_h + " horas "+data.boot_time_m+" minutos";
+
 
         document.getElementById("hostname-value").textContent =
             data.hostname;
+        
+        document.getElementById("cpu-name-value").textContent =
+            data.cpu_name;
 
         document.getElementById("platform-value").textContent =
             data.platform;

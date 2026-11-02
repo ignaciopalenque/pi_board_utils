@@ -24,7 +24,16 @@ const elementos = {
 
 document.addEventListener("DOMContentLoaded", iniciar);
 
+document.getElementById("infoConfig").addEventListener("click",()=>{
 
+   Swal.fire({
+                    title: "Información de la configuración",
+                    text: "Para añadir un nuevo documento a la intranet, primero hay que añadirlo en el indice documental (/static/documentos.json) y posteriormente subir el documento pdf (/static/documentos)",
+                    icon: "info",
+                    theme: 'dark'
+                });
+
+})
 
 
 async function iniciar() {
