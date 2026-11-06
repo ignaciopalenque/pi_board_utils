@@ -611,65 +611,95 @@ class FileExplorer {
         }
     }
 
-    showContextMenu(event, item, type) {
-        // Remover menú anterior si existe
-        const existingMenu = document.querySelector('.context-menu');
-        if (existingMenu) existingMenu.remove();
+showContextMenu(event, item, type) {
+    event.preventDefault();
 
-        const menu = document.createElement('div');
-        menu.className = 'context-menu';
-        menu.style.left = event.pageX + 'px';
-        menu.style.top = event.pageY + 'px';
-        const options = [
-            {
-                label: type === 'folder' ? '📂 Abrir' : '💾 Descargar',
-                action: () => {
-                    if (type === 'folder') {
-                        this.navigateToFolder(item.path);
-                    } else {
-                        this.downloadFile(item.path);
-                    }
+    // Remover menú anterior si existe
+    document.querySelector('.context-menu')?.remove();
+
+    const menu = document.createElement('div');
+    menu.className = 'context-menu';
+
+    // Posición provisional para poder medir el menú
+    menu.style.left = '0px';
+    menu.style.top = '0px';
+
+    const options = [
+        {
+            label: type === 'folder' ? '📂 Abrir' : '💾 Descargar',
+            action: () => {
+                if (type === 'folder') {
+                    this.navigateToFolder(item.path);
+                } else {
+                    this.downloadFile(item.path);
                 }
-            },
-
-            ...(type === 'file' && this.isEditableTextFile(item.name || item.path)
-                ? [{
-                    label: '📝 Editar',
-                    action: () => this.openTextFile(item)
-                }]
-                : []),
-
-            {
-                label: '✏️ Renombrar',
-                action: () => this.showRenameModal(item)
-            },
-            {
-                label: '🗑️ Eliminar',
-                action: () => this.deleteItemConfirm(item.path),
-                danger: true
             }
-        ];
+        },
+        ...(type === 'file' && this.isEditableTextFile(item.name || item.path)
+            ? [{
+                label: '📝 Editar',
+                action: () => this.openTextFile(item)
+            }]
+            : []),
+        {
+            label: '✏️ Renombrar',
+            action: () => this.showRenameModal(item)
+        },
+        {
+            label: '🗑️ Eliminar',
+            action: () => this.deleteItemConfirm(item.path),
+            danger: true
+        }
+    ];
 
-        options.forEach(option => {
-            const menuItem = document.createElement('div');
-            menuItem.className = 'context-menu-item' + (option.danger ? ' danger' : '');
-            menuItem.textContent = option.label;
-            menuItem.addEventListener('click', () => {
-                option.action();
-                menu.remove();
-            });
-            menu.appendChild(menuItem);
+    options.forEach(option => {
+        const menuItem = document.createElement('div');
+        menuItem.className =
+            'context-menu-item' + (option.danger ? ' danger' : '');
+        menuItem.textContent = option.label;
+
+        menuItem.addEventListener('click', () => {
+            menu.remove();
+            option.action();
         });
 
-        document.body.appendChild(menu);
+        menu.appendChild(menuItem);
+    });
 
-        // Cerrar menú al hacer click fuera
-        document.addEventListener('click', (e) => {
-            if (!menu.contains(e.target)) {
-                menu.remove();
-            }
-        }, { once: true });
-    }
+    document.body.appendChild(menu);
+
+    // Ajustar la posición para que el menú no salga de la ventana
+    const margin = 8;
+    const rect = menu.getBoundingClientRect();
+
+    const left = Math.max(
+        margin,
+        Math.min(event.clientX, window.innerWidth - rect.width - margin)
+    );
+
+    const top = Math.max(
+        margin,
+        Math.min(event.clientY, window.innerHeight - rect.height - margin)
+    );
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+
+    // Cerrar al hacer clic fuera
+    const closeOnOutsideClick = e => {
+        if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeOnOutsideClick);
+        }
+    };
+
+    // Esperar al siguiente ciclo para que el clic que abrió el menú
+    // no lo cierre inmediatamente.
+    setTimeout(() => {
+        document.addEventListener('click', closeOnOutsideClick);
+    }, 0);
+}
+
 
     showRenameModal(item) {
         this.selectedItem = item;
@@ -853,3 +883,25 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+function showContextMenu(menu, event) {
+    menu.style.display = 'block';
+    menu.style.left = '0px';
+    menu.style.top = '0px';
+
+    const margin = 8;
+    const rect = menu.getBoundingClientRect();
+
+    const left = Math.max(
+        margin,
+        Math.min(event.clientX, window.innerWidth - rect.width - margin)
+    );
+
+    const top = Math.max(
+        margin,
+        Math.min(event.clientY, window.innerHeight - rect.height - margin)
+    );
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+}

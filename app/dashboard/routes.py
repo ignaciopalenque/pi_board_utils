@@ -2,6 +2,7 @@ import platform
 import socket
 import time
 import psutil
+from pathlib import Path
 from flask import Blueprint, jsonify, render_template
 from flask_login import login_required
 import cpuinfo
@@ -34,7 +35,7 @@ def metrics():
     net = psutil.net_io_counters()
     plan = powerGetCost.get_energy_plan()
     tdp = powerGetCost.get_tdp_smart()
-
+    cpu_name = CPU_INFO.get('brand_raw', 'Unknown')
     boot_time_h, boot_time_m = powerGetCost.get_boot_time()
     # Temperatura
     temperature = None
@@ -49,7 +50,15 @@ def metrics():
 
     # Obtener CPU global (intervalo corto)
     cpu_percent = psutil.cpu_percent(interval=0.1)
-    cpu_freq = psutil.cpu_freq().current
+
+    if "CORTEX-A53" in cpu_name.upper():
+        freq_file = Path(
+            "/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq"
+            )
+        cpu_freq = int(freq_file.read_text().strip()) / 1000
+
+    else:
+        cpu_freq = psutil.cpu_freq().current
 
 
     # Procesos: solo un bucle, sin sleep
@@ -77,7 +86,7 @@ def metrics():
         "hostname": socket.gethostname(),
         "platform": platform.platform(),
         "cpu": cpu_percent,
-        "cpu_name": CPU_INFO.get('brand_raw', 'Unknown'),
+        "cpu_name": cpu_name,
         "cpu_freq": cpu_freq,
         "memory": memory.percent,
         "memory_used": memory.used / (1024 ** 3),
