@@ -1,12 +1,16 @@
 import os
 import json
 from pathlib import Path
-from flask import Blueprint, request, jsonify, send_file, render_template 
+from flask import Blueprint, request, current_app, jsonify, send_file, render_template 
 from flask_login import login_required, current_user
 
 from werkzeug.utils import secure_filename
 from functools import wraps
 import shutil
+
+
+
+
 
 # Crear blueprint con dos prefijos
 files_bp = Blueprint('files', __name__)
@@ -342,3 +346,85 @@ def debug_files_request():
         request.path,
         flush=True
     )
+
+
+TEXT_EXTENSIONS = {
+    ".txt", ".md", ".json", ".py", ".html", ".css",
+    ".js", ".csv", ".xml", ".yml", ".yaml", ".ini", ".log",
+}
+MAX_FILE_BYTES = 1_000_000  # 1 MB
+
+
+def get_editable_file(relative_path):
+    if not current_user.root_path:
+        root_path=os.path.expanduser('~')
+    else:
+        root_path=current_user.root_path
+
+    root = Path(root_path).resolve()
+    candidate = (root / relative_path).resolve()
+
+    # Impide acceder fuera de la carpeta autorizada.
+    try:
+        candidate.relative_to(root)
+    except ValueError:
+        return None
+
+    if candidate.suffix.lower() not in TEXT_EXTENSIONS:
+        return None
+
+    return candidate
+
+
+@files_bp.get(f"{api_prefix}/content")
+@login_required
+def read_text_file():
+    relative_path = request.args.get("path", "")
+    path = get_editable_file(relative_path)
+
+    if path is None:
+        print("sin ruta")
+        return jsonify(error="Ruta o tipo de archivo no permitido"), 403
+    if not path.is_file():
+        print("archivo no encontrado")
+        return jsonify(error="Archivo no encontrado"), 404
+    
+    if path.stat().st_size > MAX_FILE_BYTES:
+        return jsonify(error="El archivo supera el tamaño permitido"), 413
+
+    try:
+        content = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return jsonify(error="El archivo no es texto UTF-8 válido"), 415
+    except OSError:
+        return jsonify(error="No se pudo leer el archivo"), 500
+
+    return jsonify(content=content)
+
+
+@files_bp.put(f"{api_prefix}/content")
+@login_required
+def write_text_file():
+    data = request.get_json(silent=True) or {}
+    relative_path = data.get("path")
+    content = data.get("content")
+
+    if not isinstance(relative_path, str) or not isinstance(content, str):
+        return jsonify(error="Datos inválidos"), 400
+
+    if len(content.encode("utf-8")) > MAX_FILE_BYTES:
+        return jsonify(error="El contenido supera el tamaño permitido"), 413
+
+    path = get_editable_file(relative_path)
+
+    if path is None:
+        return jsonify(error="Ruta o tipo de archivo no permitido"), 403
+    if not path.is_file():
+        return jsonify(error="Archivo no encontrado"), 404
+
+    try:
+        path.write_text(content, encoding="utf-8")
+    except OSError:
+        return jsonify(error="No se pudo guardar el archivo"), 500
+
+    return jsonify(ok=True)

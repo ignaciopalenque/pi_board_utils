@@ -44,6 +44,16 @@ class FileExplorer {
         this.renameInput = document.getElementById('renameInput');
         this.renameConfirm = document.getElementById('renameConfirm');
         this.renameCancel = document.getElementById('renameCancel');
+        this.editor = document.querySelector('#text-editor');
+        this.editorTitle = document.querySelector('#text-editor-title');
+        this.editorContent = document.querySelector('#text-editor-content');
+        this.editorCancel = document.querySelector('#text-editor-cancel');
+        this.editorSave = document.querySelector('#text-editor-save');
+
+        this.currentFilePath = null;
+
+
+
     }
 
     attachEventListeners() {
@@ -52,6 +62,13 @@ class FileExplorer {
         this.rootPathInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.setRootPath();
         });
+
+        this.editorCancel.addEventListener('click', () => {
+            this.editor.close();
+            this.currentFilePath = null;
+        });
+
+        this.editorSave.addEventListener('click', () => this.saveTextFile());
 
         // Navegación
         this.backBtn.addEventListener('click', () => this.navigateBack());
@@ -88,6 +105,79 @@ class FileExplorer {
             }
         });
     }
+
+    isEditableTextFile(nameOrPath = '') {
+        return /\.(txt|md|json|py|html|css|js|csv|xml|yml|yaml|ini|log)$/i
+            .test(nameOrPath);
+    }
+
+    async openTextFile(item) {
+        try {
+            const response = await fetch(
+                `/api/files/content?path=${encodeURIComponent(item.path)}`
+            );
+            if (!response.ok) {
+                throw new Error(await this.getResponseError(response));
+            }
+
+            const data = await response.json();
+
+            this.currentFilePath = item.path;
+            this.editorTitle.textContent = `Editar: ${item.name || item.path}`;
+            this.editorContent.value = data.content;
+            this.editor.showModal();
+        } catch (error) {
+            alert(error.message || 'No se pudo abrir el archivo.');
+        }
+    }
+
+    async saveTextFile() {
+        if (!this.currentFilePath) return;
+
+        try {
+
+            const csrfToken = document.querySelector(
+            'meta[name="csrf-token"]'
+            )?.getAttribute('content');
+
+            if (!csrfToken) {
+                this.showError('No se ha encontrado el token CSRF');
+                return;
+            }
+
+
+
+            const response = await fetch('/api/files/content', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json', 'X-CSRFToken': csrfToken 
+                },
+                body: JSON.stringify({
+                    path: this.currentFilePath,
+                    content: this.editorContent.value
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(await this.getResponseError(response));
+            }
+
+            this.editor.close();
+            this.currentFilePath = null;
+        } catch (error) {
+            alert(error.message || 'No se pudo guardar el archivo.');
+        }
+    }
+
+    async getResponseError(response) {
+        try {
+            const data = await response.json();
+            return data.error || `Error ${response.status}`;
+        } catch {
+            return `Error ${response.status}`;
+        }
+    }
+
 
     async loadRootPath() {
         try {
@@ -530,7 +620,6 @@ class FileExplorer {
         menu.className = 'context-menu';
         menu.style.left = event.pageX + 'px';
         menu.style.top = event.pageY + 'px';
-
         const options = [
             {
                 label: type === 'folder' ? '📂 Abrir' : '💾 Descargar',
@@ -542,6 +631,14 @@ class FileExplorer {
                     }
                 }
             },
+
+            ...(type === 'file' && this.isEditableTextFile(item.name || item.path)
+                ? [{
+                    label: '📝 Editar',
+                    action: () => this.openTextFile(item)
+                }]
+                : []),
+
             {
                 label: '✏️ Renombrar',
                 action: () => this.showRenameModal(item)

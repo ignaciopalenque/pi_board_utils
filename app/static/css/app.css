@@ -1088,6 +1088,41 @@ h1{
 
 
 
+/* Estilos edición textos */
+#text-editor {
+    background: var(--full-bg-dark);
+    width: min(900px, 90vw);
+    height: min(80vh, 700px);
+    padding: 1rem;
+    color: white;
+}
+
+.text-editor__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+    
+}
+
+#text-editor-content {
+    flex: 1;
+    min-height: 300px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: monospace;
+    resize: vertical;
+    color: white;
+    background: var(--card-bg);
+}
+
+.text-editor__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+
 
 
 @media (max-width: 768px) {
