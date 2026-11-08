@@ -8,10 +8,8 @@ from .models import User
 
 
 
-
 def create_app():
     app = Flask(__name__)
-
     print(">>> APLICACIÓN FLASK INICIADA CON ESTE CÓDIGO", flush=True)
 
     @app.before_request
@@ -55,7 +53,8 @@ def create_app():
     from app.files.routes import files_bp  # NUEVO
     from app.calendar.routes import calendar_bp
     from app.intranet.routes import intranet_bp
-    
+    from .github_sync.routes import github_sync_bp
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(clipboard_bp)
@@ -63,6 +62,7 @@ def create_app():
     app.register_blueprint(files_bp)  # NUEVO
     app.register_blueprint(calendar_bp)  # NUEVO
     app.register_blueprint(intranet_bp)  # NUEVO
+    app.register_blueprint(github_sync_bp)
 
     register_placeholder_routes(app)
 

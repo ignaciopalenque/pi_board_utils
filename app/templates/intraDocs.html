@@ -5,6 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <meta
     name="description"
@@ -82,7 +83,12 @@
         </label>
 
         <div>
-         <button id="infoConfig" class="boton boton-secundario" title="Subir archivo">
+        
+        <button id="secureSyncGithub" class="boton boton-secundario" title="Sincronizar contenido cifrado en github">
+            📤 Secure Sync GitHub
+        </button>
+
+         <button id="infoConfig" class="boton boton-secundario" title="Información de la aplicación">
             📤 Info config
         </button>
 

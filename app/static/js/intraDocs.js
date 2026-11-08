@@ -35,6 +35,51 @@ document.getElementById("infoConfig").addEventListener("click",()=>{
 
 })
 
+document.getElementById("secureSyncGithub").addEventListener("click",()=>{
+
+  this.syncGitHub();
+
+})
+
+
+async function syncGitHub() {
+  try {
+
+    const csrfToken = document.querySelector(
+        'meta[name="csrf-token"]'
+    )?.getAttribute("content");
+
+    const response = await fetch("/api/github/upload-server-folder", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrfToken
+    },
+    credentials: "same-origin"
+
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+      console.log("Respuesta del servidor:", result);
+      throw new Error("No se pudo sincronizar con github");
+    }
+  
+  Swal.fire({
+                    title: "Sincronización con github",
+                    text: "El repositorio se ha sincronizado correctamente",
+                    icon: "info",
+                    theme: 'dark'
+                });
+
+  
+      
+  } catch (error) {
+
+        console.error(error);
+
+  }
+}
 
 async function iniciar() {
   configurarEventos();
