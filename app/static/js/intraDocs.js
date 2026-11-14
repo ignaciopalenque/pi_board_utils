@@ -3,6 +3,8 @@ const estado = {
   favoritos: obtenerFavoritos(),
 };
 
+
+
 const rootDoc = ""
 const elementos = {
   buscador: document.getElementById("buscador"),
@@ -35,16 +37,72 @@ document.getElementById("infoConfig").addEventListener("click",()=>{
 
 })
 
-document.getElementById("secureSyncGithub").addEventListener("click",()=>{
+const boton = document.getElementById("secureSyncGithub");
+const syncModal = document.getElementById("dialog-sync-github");
+const checkUpEnv = document.getElementById("checkUpEnv")
+const github_source_dir = document.getElementById("github-input-source")
+const destination_value = document.getElementById("github-input-dest")
+const github_owner= document.getElementById("github-input-owner")
+const github_repo = document.getElementById("github-input-dir")
+const dialogWaitUp = document.getElementById("dialogWaitUp");
 
-  this.syncGitHub();
+checkUpEnv.addEventListener("change",()=>{
+
+
+  if (checkUpEnv.checked){
+
+  limpiarGitSyncInput()
+  }
+
+  github_source_dir.disabled = checkUpEnv.checked
+  destination_value.disabled = checkUpEnv.checked
+  github_owner.disabled = checkUpEnv.checked
+  github_repo.disabled = checkUpEnv.checked
+
+
+})
+
+if (boton && syncModal) {
+  boton.addEventListener("click", () => {
+    limpiarGitSyncInput()
+    syncModal.showModal();
+
+  });
+}
+
+document.getElementById("github-sync-cancel").addEventListener('click',()=>{
+
+
+  syncModal.close()
+})
+
+document.getElementById("github-sync-save").addEventListener('click',()=>{
+
+checkUpEnv.checked
+  ? this.syncGitHubEnv()
+  : this.syncGitHub(
+      github_source_dir.value,
+      destination_value.value,
+      github_owner.value,
+      github_repo.value
+    );
+
 
 })
 
 
-async function syncGitHub() {
-  try {
+function limpiarGitSyncInput(){
+  github_source_dir.value = ""
+  destination_value.value = ""
+  github_owner.value = ""
+  github_repo.value = ""
+}
 
+
+async function syncGitHub(github_source_dir_p, destination_value_p, github_owner_p, github_repo_p) {
+  try {
+    syncModal.close()
+    dialogWaitUp.showModal();
     const csrfToken = document.querySelector(
         'meta[name="csrf-token"]'
     )?.getAttribute("content");
@@ -54,6 +112,13 @@ async function syncGitHub() {
     headers: {
       "X-CSRFToken": csrfToken
     },
+    body: JSON.stringify({
+        github_source_dir : github_source_dir_p,
+        destination_value : destination_value_p,
+        github_owner : github_owner_p,
+        github_repo : github_repo_p
+
+            }),
     credentials: "same-origin"
 
   });
@@ -61,10 +126,18 @@ async function syncGitHub() {
   const result = await response.json();
 
   if (!response.ok) {
+      dialogWaitUp.close();
+      Swal.fire({
+                    title: "Error sincronización con github",
+                    text: "No se pudo sincronizar con github",
+                    icon: "error",
+                    theme: 'dark'
+                });
       console.log("Respuesta del servidor:", result);
       throw new Error("No se pudo sincronizar con github");
     }
   
+  dialogWaitUp.close();
   Swal.fire({
                     title: "Sincronización con github",
                     text: "El repositorio se ha sincronizado correctamente",
@@ -81,7 +154,60 @@ async function syncGitHub() {
   }
 }
 
+
+
+async function syncGitHubEnv() {
+  try {
+
+    syncModal.close()
+    dialogWaitUp.showModal();
+    const csrfToken = document.querySelector(
+        'meta[name="csrf-token"]'
+    )?.getAttribute("content");
+
+    const response = await fetch("/api/github/upload-server-folder-env", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrfToken
+    },
+    credentials: "same-origin"
+
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+      dialogWaitUp.close();
+      Swal.fire({
+                    title: "Error sincronización con github",
+                    text: "No se pudo sincronizar con github",
+                    icon: "error",
+                    theme: 'dark'
+                });
+      console.log("Respuesta del servidor:", result);
+      throw new Error("No se pudo sincronizar con github");
+    }
+    
+  dialogWaitUp.close();
+  Swal.fire({
+                    title: "Sincronización con github",
+                    text: "El repositorio se ha sincronizado correctamente",
+                    icon: "info",
+                    theme: 'dark'
+                });
+
+  
+      
+  } catch (error) {
+
+        console.error(error);
+
+  }
+}
+
+
 async function iniciar() {
+
   configurarEventos();
 
   try {
@@ -109,6 +235,7 @@ async function iniciar() {
 }
 
 function configurarEventos() {
+  
   elementos.buscador.addEventListener("input", renderizar);
   elementos.filtroCategoria.addEventListener("change", renderizar);
   elementos.filtroEtiqueta.addEventListener("change", renderizar);

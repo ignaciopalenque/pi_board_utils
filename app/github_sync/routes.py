@@ -75,14 +75,24 @@ def upload_server_folder():
     if getattr(current_user, "role", None) != "admin":
         return jsonify(error="No autorizado"), 403
 
-    source_value = os.environ.get("GITHUB_SOURCE_DIR")
-    destination_value = os.environ.get("GITHUB_DESTINATION")
+    data = request.get_json()
+
+      # ✓ Validar que es JSON
+    if not request.is_json:
+        return jsonify({'error': 'Content-Type debe ser application/json'}), 400
+
+    source_value = data.get('github_source_dir', '').strip()
+
+    destination_value = data.get('github_destination_value', '').strip()
+    GITHUB_OWNER = data.get('github_owner','').strip()
+    GITHUB_REPO = data.get('github_repo','').strip()
 
     if not all([GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO,
                 source_value, destination_value]):
         return jsonify(error="Falta configurar GitHub o la carpeta de origen"), 500
 
     source = Path(source_value).resolve()
+    failure_log = source / "upload_failures.log"
     destination = PurePosixPath(destination_value)
 
     if not source.is_dir():
@@ -105,7 +115,7 @@ def upload_server_folder():
         for filename in filenames:
             local_path = Path(current_dir) / filename
 
-            if local_path.is_symlink() or not local_path.is_file():
+            if local_path == failure_log or local_path.is_symlink() or not local_path.is_file():
                 continue
 
             relative_path = local_path.relative_to(source).as_posix()
@@ -149,15 +159,29 @@ def upload_server_folder():
         ), 502
 
     uploaded = []
+    failed = []
+
+
+    def log_failure(repo_path, reason):
+        failed.append({"file": repo_path, "error": reason})
+        try:
+            with failure_log.open("a", encoding="utf-8") as log:
+                log.write(f"{repo_path}\t{reason}\n")
+        except OSError:
+            # No interrumpir la subida si no se puede escribir el log.
+            pass
+
 
     for local_path, repo_path in files_to_upload:
         try:
             content = local_path.read_bytes()
 
             if len(content) > 20 * 1024 * 1024:
+                log_failure(repo_path, "supera el límite de 20 MB")
                 return jsonify(
                     error=f"El archivo supera 20 MB: {repo_path}",
                     subidos=uploaded,
+                    log=str(failure_log)
                 ), 413
 
             # Codifica cada segmento para que espacios y caracteres especiales
@@ -184,6 +208,7 @@ def upload_server_folder():
                     error=f"No se pudo consultar {repo_path} en GitHub",
                     detalle=existing.text[:1000],
                     subidos=uploaded,
+                    log=str(failure_log),
                 ), 502
 
             payload = {
@@ -203,24 +228,33 @@ def upload_server_folder():
             )
 
             if not response.ok:
+                log_failure(
+                repo_path,
+                f"GitHub rechazó el archivo: {response.text[:500]}"
+            )
                 return jsonify(
                     error=f"GitHub rechazó {repo_path}",
                     detalle=response.text[:1000],
                     subidos=uploaded,
+                    log=str(failure_log),
                 ), 502
 
             uploaded.append(repo_path)
 
         except OSError as exc:
+            log_failure(repo_path, f"error al leer el archivo: {exc}")
             return jsonify(
                 error=f"No se pudo leer {local_path}",
                 detalle=str(exc),
                 subidos=uploaded,
+                log=str(failure_log),
             ), 500
         except requests.RequestException as exc:
+            log_failure(repo_path, f"error de conexión con GitHub: {exc}")
             return jsonify(
                 error=f"Error de conexión con GitHub: {exc}",
                 subidos=uploaded,
+                log=str(failure_log),
             ), 502
 
     return jsonify(
@@ -228,6 +262,193 @@ def upload_server_folder():
         message=f"Se subieron {len(uploaded)} archivos",
         files=uploaded,
     )
+
+
+
+
+
+@github_sync_bp.post("/api/github/upload-server-folder-env")
+@login_required
+def upload_server_folder_env():
+    if getattr(current_user, "role", None) != "admin":
+        return jsonify(error="No autorizado"), 403
+
+    source_value = os.environ.get("GITHUB_SOURCE_DIR")
+    destination_value = os.environ.get("GITHUB_DESTINATION")
+
+    if not all([GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO,
+                source_value, destination_value]):
+        return jsonify(error="Falta configurar GitHub o la carpeta de origen"), 500
+
+    source = Path(source_value).resolve()
+    failure_log = source / "upload_failures.log"
+
+    destination = PurePosixPath(destination_value)
+
+    if not source.is_dir():
+        return jsonify(error="La carpeta configurada no existe en la Raspberry"), 400
+
+    # Solo admite los destinos previstos para este proyecto.
+    dest_string = destination.as_posix()
+  
+
+    files_to_upload = []
+
+    # Recorre subcarpetas, pero no sigue enlaces simbólicos.
+    for current_dir, dirnames, filenames in os.walk(source, followlinks=False):
+        dirnames[:] = [
+            name for name in dirnames
+            if not (Path(current_dir) / name).is_symlink()
+        ]
+
+        for filename in filenames:
+            local_path = Path(current_dir) / filename
+
+            if local_path == failure_log or local_path.is_symlink() or not local_path.is_file():
+                continue
+
+            relative_path = local_path.relative_to(source).as_posix()
+            repo_path = f"{dest_string}/{relative_path}"
+            files_to_upload.append((local_path, repo_path))
+
+    if not files_to_upload:
+        return jsonify(ok=True, message="La carpeta no contiene archivos"), 200
+    
+
+
+    repo_url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}"
+
+    repo_check = requests.get(
+        repo_url,
+        headers=github_headers(),
+        timeout=20,
+    )
+
+    if not repo_check.ok:
+        return jsonify(
+            error="No se puede acceder al repositorio",
+            status_github=repo_check.status_code,
+            detalle=repo_check.text[:1000],
+        ), 502
+
+    branch_url = f"{repo_url}/branches/{quote(GITHUB_BRANCH, safe='')}"
+
+    branch_check = requests.get(
+        branch_url,
+        headers=github_headers(),
+        timeout=20,
+    )
+
+    if not branch_check.ok:
+        return jsonify(
+            error="No se encuentra o no se puede acceder a la rama configurada",
+            status_github=branch_check.status_code,
+            rama=GITHUB_BRANCH,
+            detalle=branch_check.text[:1000],
+        ), 502
+
+    uploaded = []
+    failed = []
+
+    def log_failure(repo_path, reason):
+        failed.append({"file": repo_path, "error": reason})
+        try:
+            with failure_log.open("a", encoding="utf-8") as log:
+                log.write(f"{repo_path}\t{reason}\n")
+        except OSError:
+            # No interrumpir la subida si no se puede escribir el log.
+            pass
+
+
+    for local_path, repo_path in files_to_upload:
+        try:
+            content = local_path.read_bytes()
+
+            if len(content) > 20 * 1024 * 1024:
+                log_failure(repo_path, "supera el límite de 20 MB")
+                return jsonify(
+                    error=f"El archivo supera 20 MB: {repo_path}",
+                    subidos=uploaded,
+                    log=str(failure_log),
+                ), 413
+
+            # Codifica cada segmento para que espacios y caracteres especiales
+            # no alteren la ruta de la petición.
+            encoded_path = quote(repo_path, safe="/")
+            url = (
+                f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}"
+                f"/contents/{encoded_path}"
+            )
+
+            existing = requests.get(
+                url,
+                headers=github_headers(),
+                params={"ref": GITHUB_BRANCH},
+                timeout=20,
+            )
+
+            if existing.status_code == 200:
+                sha = existing.json()["sha"]
+            elif existing.status_code == 404:
+                sha = None
+            else:
+                log_failure(repo_path, f"No se pudo consultar {repo_path} en GitHub")
+                return jsonify(
+                    error=f"No se pudo consultar {repo_path} en GitHub",
+                    detalle=existing.text[:1000],
+                    subidos=uploaded,
+                    log=str(failure_log),
+                ), 502
+
+            payload = {
+                "message": f"Actualizar {repo_path}",
+                "content": base64.b64encode(content).decode("ascii"),
+                "branch": GITHUB_BRANCH,
+            }
+
+            if sha:
+                payload["sha"] = sha
+
+            response = requests.put(
+                url,
+                headers=github_headers(),
+                json=payload,
+                timeout=30,
+            )
+
+            if not response.ok:
+                log_failure(repo_path,f"GitHub rechazó el archivo: {response.text[:500]}")
+                return jsonify(
+                    error=f"GitHub rechazó {repo_path}",
+                    detalle=response.text[:1000],
+                    subidos=uploaded,
+                    log=str(failure_log),
+                ), 502
+
+            uploaded.append(repo_path)
+
+        except OSError as exc:
+            log_failure(repo_path, f"error al leer el archivo: {exc}")
+            return jsonify(
+                error=f"No se pudo leer {local_path}",
+                detalle=str(exc),
+                subidos=uploaded,
+                log=str(failure_log),
+            ), 500
+        except requests.RequestException as exc:
+            log_failure(repo_path, f"error de conexión con GitHub: {exc}")
+            return jsonify(
+                error=f"Error de conexión con GitHub: {exc}",
+                subidos=uploaded,
+                log=str(failure_log),
+            ), 502
+
+    return jsonify(
+        ok=True,
+        message=f"Se subieron {len(uploaded)} archivos",
+        files=uploaded,
+    )
+
 
 
 

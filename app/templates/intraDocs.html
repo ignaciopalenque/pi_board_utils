@@ -89,7 +89,7 @@
         </button>
 
          <button id="infoConfig" class="boton boton-secundario" title="Información de la aplicación">
-            📤 Info config
+            📖 Info config
         </button>
 
 
@@ -151,6 +151,85 @@
       <iframe id="visorPDF" title="Vista previa del documento PDF"></iframe>
     </div>
   </div>
+
+
+<dialog id="dialog-sync-github" style="background-color:#0f172a;">
+    <form method="dialog" class="text-editor__form">
+        <h2 id="text-editor-title" style="color: white;">Sincronizar repositorio con github</h2>
+        
+        
+        <fieldset>
+        <legend style="color: white;">Marca o desmarca el check para subir los cambios al repositorio definido en las variables de entorno o por el contrario a un repositorio personalizado:</legend>
+
+        <div style="display: inline-flex; color: red">
+          <input type="checkbox" id="checkUpEnv" name="scales" checked />
+          <label for="scales">Valores establecidos en las variables de entorno</label>
+        </div>
+
+
+      </fieldset>
+        
+        <label for="github-input-source" style="color: red">Introduzca la dirección de origen</label><br>
+        <input aria-label="Introduzca dirección de origen" id="github-input-source"
+         type="text" disabled></input><br>
+
+        <label for="github-input-dest" style="color: red" >Introduzca la dirección de destino</label><br>
+        <input aria-label="Introduzca dirección de destino" id="github-input-dest" value=""
+         type="text" disabled></input><br>
+
+        <label for="github-input-owner" style="color: red">Introduzca el propietario del repositorio</label><br>
+        <input aria-label="Introduzca el propietario del repositorio" id="github-input-owner"
+         type="text" disabled></input><br>
+
+        <label for="github-input-dir" style="color:red">Introduzca la dirección del repositorio</label><br>
+        <input aria-label="Introduzca la dirección del repositorio" id="github-input-dir"
+         type="text" disabled></input><br>
+
+
+        <div class="text-editor__actions">
+            <button type="button" id="github-sync-cancel">Cancelar</button>
+            <button type="button" id="github-sync-save">Subir Cambios</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="dialogWaitUp" style="background-color:#0f172a;">
+
+    <style>
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 0.9;
+    }
+  }
+</style>
+
+<section>
+  <div style="display: flex; background: transparent; padding: 2rem; justify-content: center; align-items: center; height: 450px;">
+    <div style="text-align: center;">
+      <div
+        style="width: 6rem; height: 6rem; border: 4px solid #374151; border-top-color: #3fc3ee; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem;"
+      ></div>
+
+      <div style="color: #3fc3ee; font-weight: 600; font-size: 2.25rem; opacity: 0.9; animation: fadeIn 1s ease-in;">
+        Subiendo contenido al repositorio...
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+
+</dialog>
 
   <footer class="pie">
     Repositorio personal de documentación técnica en el ámbito de la tecnología de la información
