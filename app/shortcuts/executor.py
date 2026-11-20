@@ -13,6 +13,8 @@ SHORTCUTS_FILE = BASE_DIR / "shortcuts.json"
 ALLOWED_SSH_COMMANDS = {
     "suspend": "sudo -n /usr/bin/systemctl suspend",
     "reboot": "sudo -n /usr/bin/systemctl reboot",
+    "poweroff": "sudo -n /usr/bin/systemctl poweroff",
+    "up_server_file_games":"sudo -n /home/deck/iniciarServidorDeArchivos.sh",
     "uptime": "/usr/bin/uptime",
 }
 
@@ -22,7 +24,12 @@ CREDENTIALS = {
         "host": "192.168.100.62",
         "user": "nacho",
         "key": "/var/lib/intranet/.ssh/id_ed25519",
-    }
+    },
+    "servidor_juegos": {
+            "host": "192.168.100.45",
+            "user": "deck",
+            "key": "/var/lib/intranet/.ssh/id_ed25519",
+        }
 }
 
 
